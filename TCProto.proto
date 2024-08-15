@@ -1,0 +1,235 @@
+syntax = "proto3";
+package TCProto;
+
+/*
+Ϊ�˿���ת��ΪUE��ͼ���ͣ���ʹ��Ƕ����Ϣ����ʹ��optional����ʹ��map
+*/
+
+message IntVector {
+	int32 x = 1;
+	int32 y = 2;
+	int32 z = 3;
+}
+
+enum MoveState {
+	STOP = 0;
+	WALK = 1;
+	RUN = 2;
+	SPRINT = 3;
+}
+
+enum PoetryDuelLoadingScene {
+	LOADING_DEFAULT = 0;
+	LOADING_SHOW_POEM = 1;
+	LOADING_RECALL_BEGIN = 2;
+	LAODING_RECALL_END = 3;
+}
+
+enum PoetryDuelTopic {
+	TOPIC_INVALID = 0;
+	TOPIC_FAREWELL = 1;
+	TOPIC_SCENERY = 2;
+	TOPIC_LIFE = 3;
+}
+
+// --------------------- ToGame --------------------
+
+message ToGame {
+	ObserveReq observe_req												= 1;
+	repeated SetSolarTimeReq set_solar_time_reqs						= 2; // 0 - 24
+	repeated SetSolarTimeSpeedReq set_solar_time_speed_reqs				= 3;
+	repeated CreatePlayerReq create_player_reqs							= 4;
+	repeated IgnoreHumanInputReq ignore_human_input_reqs				= 5;
+	repeated RandomReachablePositionReq random_reachable_position_reqs  = 6;
+	repeated ShowDistanceReq show_distance_reqs							= 7;
+
+	repeated MoveAction move_actions									= 10;
+	repeated BubbleAction bubble_actions								= 11;
+	repeated TeleportAction teleport_actions							= 12;
+	repeated AnimateAction animate_actions								= 13;
+	repeated ChatAction chat_actions									= 14;
+	repeated KeyPlotAction key_plot_actions								= 15;
+	repeated MoveToAction move_to_actions								= 16;
+
+	repeated PoetryDuelConfirmBeginReq poetry_duel_confirm_begin_reqs	= 30;
+	repeated PoetryDuelSelectTopicReq poetry_duel_select_topic_reqs		= 31;
+	repeated PoetryDuelLoadingReq poetry_duel_loading_reqs				= 32;
+	repeated PoetryDuelShowPoemReq poetry_duel_show_poem_reqs			= 33;
+	repeated PoetryDuelCreationReq poetry_duel_creation_reqs			= 34;
+	repeated PoetryDuelScoreReq poetry_duel_score_reqs					= 35;
+	repeated PoetryDuelRecallModeReq poetry_duel_recall_mode_reqs		= 36;
+	repeated PoetryDuelChatModeReq poetry_duel_chat_mode_reqs			= 37;
+	repeated PoetryDuelEndReq poetry_duel_end_reqs						= 38;
+}
+
+message SetSolarTimeReq {
+	float time = 1;
+}
+
+message SetSolarTimeSpeedReq {
+	float speed = 1; // 1 means same as real world
+}
+
+message ObserveReq {
+	bool valid = 1;
+	repeated int32 player_ids = 2;
+	bool observe_all_players = 3;
+}
+
+message CreatePlayerReq {
+	int32 player_id														= 1;
+	IntVector position													= 2;
+	int32 yaw															= 3;
+	int32 model_id														= 4;
+	string name															= 5;
+}
+
+message IgnoreHumanInputReq {
+	int32 player_id														= 1;
+	bool is_ignore														= 2;
+}
+
+message RandomReachablePositionReq {
+	IntVector position													= 1;
+	int32 radius														= 2;
+}
+
+message PoetryDuelConfirmBeginReq {
+	int32 duration = 1; // in ms
+}
+
+message PoetryDuelSelectTopicReq {}
+
+message PoetryDuelLoadingReq {
+	PoetryDuelLoadingScene scene = 1;
+}
+
+message PoetryDuelShowPoemReq {
+	string title = 1;
+	string author = 2;
+	repeated string lines = 3;
+	repeated string backgrounds = 4;
+}
+
+message PoetryDuelCreationReq {
+	PoetryDuelTopic topic = 1;
+	int32 line_index = 2;
+	repeated string options = 3;
+}
+
+message PoetryDuelScoreReq {
+	string title = 1;
+	string author = 2;
+	repeated string lines = 3;
+	int32 score = 4;
+	PoetryDuelTopic topic = 5;
+	repeated PoetryDuelTopic line_topics = 6;
+}
+
+message PoetryDuelRecallModeReq {}
+
+message PoetryDuelChatModeReq {}
+
+message PoetryDuelEndReq {}
+
+message ShowDistanceReq {
+	int32 player_id = 1;
+}
+
+message MoveAction {
+	int32 player_id														= 1;
+	MoveState move_state												= 2;
+	int32 yaw															= 3;
+}
+
+message BubbleAction {
+	int32 player_id														= 1;
+	string text															= 2;
+	int32 duration														= 3; // in ms
+}
+
+message TeleportAction {
+	int32 player_id														= 1;
+	IntVector position													= 2;
+	int32 yaw															= 3;
+}
+
+message AnimateAction {
+	int32 player_id														= 1;
+	int32 animate_state													= 2; // 0 means empty
+	bool is_repeat														= 3;
+}
+
+message ChatAction {
+	int32 player_id														= 1;
+	int32 chatting_player_id											= 2; // 0 means empty
+}
+
+message KeyPlotAction {
+	int32 player_id														= 1;
+	string text															= 2;
+	int32 event_id														= 3;
+}
+
+message MoveToAction {
+	int32 player_id														= 1;
+	IntVector position													= 2;
+	int32 yaw															= 3;
+	bool abort															= 4;
+	MoveState move_state												= 5;
+}
+
+// --------------------- FromGame --------------------
+
+message FromGame {
+	repeated PlayerState player_states									= 1;
+	float solar_time													= 2; // 0 - 24
+	bool is_raining														= 3;
+
+	repeated RandomReachablePositionRsp random_reachable_position_rsps  = 10;
+
+	repeated int32 finish_move_to_player_ids							= 20;
+	repeated int32 human_controlled_player_ids							= 21;
+
+	repeated PoetryDuelConfirmBeginRsp poetry_duel_confirm_begin_rsps	= 30;
+	repeated PoetryDuelSelectTopicRsp poetry_duel_select_topic_rsps		= 31;
+	repeated PoetryDuelLoadingRsp poetry_duel_loading_rsps				= 32;
+	repeated PoetryDuelShowPoemRsp poetry_duel_show_poem_rsps			= 33;
+	repeated PoetryDuelCreationRsp poetry_duel_creation_rsps			= 34;
+	repeated PoetryDuelScoreRsp poetry_duel_score_rsps					= 35;
+}
+
+message PlayerState {
+	int32 player_id														= 1;
+	IntVector position													= 2;
+	MoveState move_state												= 3;
+	int32 yaw															= 4;
+	string bubble_text													= 5;
+	int32 animate_state													= 6; // 0 means empty
+	int32 chatting_player_id											= 7; // 0 means empty
+	repeated int32 nearby_player_ids									= 8; // < 12m
+	bool move_to_in_progress											= 9;
+};
+
+message RandomReachablePositionRsp {
+	IntVector position = 1;
+	bool is_fail = 2;
+}
+
+message PoetryDuelConfirmBeginRsp {
+	bool confirm = 1;
+}
+
+message PoetryDuelSelectTopicRsp {
+	PoetryDuelTopic topic = 1;
+}
+
+message PoetryDuelLoadingRsp {}
+
+message PoetryDuelShowPoemRsp {}
+
+message PoetryDuelCreationRsp {
+	int32 option = 1; // -1 means reroll
+}
+
+message PoetryDuelScoreRsp {}
