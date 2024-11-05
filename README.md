@@ -22,7 +22,7 @@ npm run dev
 - State Management：`Zustand`
 - 3D Rendering ：`R3F (React Three Fiber)`
 - Navigation and Character Control：`Yuka.js`
-- Main File：*src/pages/three/movement-0528.tsx`
+- Main File：[`src/pages/three/movement-0528.tsx`](https://github.com/QuinnyT/threejs-r3f/blob/master/src/pages/three/movement-0528.tsx)
 
       
 
